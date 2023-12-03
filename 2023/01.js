@@ -17,6 +17,7 @@ const firstRepeatedId3 = findFirstRepeated(giftIds3)
 console.log(firstRepeatedId3) // 5
 */
 
+//160 pts - 2,629 ops/s - cc:2
 function findFirstRepeated(gifts) {
   let count = [];
   for (let id of gifts) {
