@@ -18,85 +18,70 @@ result:
   '...*..S*..', // sled advances on the road
   '...*...S..', // passes through the open barrier
 ]
-
 */
 
+//fails one secret test
 function cyberReindeer(road, time) {
   //hold all strings
   let sim = [];
-  //convert string to array to manipulate
-  let arr = road.split("");
-  //track passed barrier
-  let barrier = false;
-  //loop through units of time
-  for (let i = 0; i < time; i++) {
-    //start at initial state
-    i === 0 && sim.push(road);
-    //handle next steps
-    if (road[i] === "." && road[i - 1] !== "*") {
-      //if currently on road, TODO: handle if barrier is true
-      let curr = arr[i];
-      if (barrier) {
-        arr[i] = "S";
-        arr[i - 1] = "*";
-        sim.push(arr.join(""));
-        barrier = false;
+  //array to show current road
+  let path = road.split("");
+  //track road position
+  let pos = 0;
+  //check if barrier passed
+  let barrierPassed = false;
+  for (let i = 0; i < time - 1; i++) {
+    if (i === 0) {
+      sim.push(road);
+      pos++;
+    }
+    if (i < 4) {
+      //road with barriers
+      if (road[pos] === ".") {
+        path[pos] = "S";
+        path[pos - 1] = ".";
+        pos++;
+      }
+      sim.push(path.join(""));
+    } else {
+      //remove barriers
+      path = path.map((item) => (item === "|" ? "*" : item));
+      if (road[pos] === ".") {
+        path[pos] = "S";
+        if (barrierPassed) {
+          path[pos - 1] = "*";
+          barrierPassed = false;
+        } else {
+          path[pos - 1] = ".";
+        }
+        pos++;
       } else {
-        arr[i] = "S";
-        arr[i - 1] = curr;
-        sim.push(arr.join(""));
+        path[pos] = "S";
+        path[pos - 1] = ".";
+        barrierPassed = true;
+        pos++;
       }
-    } else if (road[i] === "|") {
-      //if on closed barrier, TODO: keep array if i > 5
-      if (i > 5) {
-        barrier = true;
-        arr[i] = "S";
-        arr[i - 1] = ".";
-      }
-      sim.push(arr.join(""));
-    } else if (road[i] === "*") {
-      //if on open barrier
-      barrier = true;
-      arr[i] = "S";
-      arr[i - 1] = ".";
-      sim.push(arr.join(""));
+      sim.push(path.join(""));
     }
   }
   return sim;
 }
 
+//refactor from solution: 150 pts - 1,862 ops/s - cc:5
 function cyberReindeer(road, time) {
-  //set loop length
-  const loop = time > road ? road : time;
-  //hold all strings
-  let sim = [];
-  //convert string to array to manipulate
-  let arr = road.split("");
-  //track passed barrier
-  let barrierPassed = false;
-  //loop through units of time
-  for (let i = 0; i < loop; i++) {
-    i === 0 && sim.push(road);
-    if (i > 5) {
-      if (road[i] === "." && road[i - 1] !== "*") {
-        let curr = arr[i];
-        if (barrierPassed) {
-          arr[i] = "S";
-          arr[i - 1] = "*";
-          barrierPassed = false;
-        } else {
-          arr[i] = "S";
-          arr[i - 1] = curr;
-        }
-        sim.push(arr.join(""));
-      } else if (road[i] === "|" || road[i] === "*") {
-        barrier = true;
-        arr[i] = "S";
-        arr[i - 1] = ".";
-        sim.push(arr.join(""));
-      }
-    }
-  }
+  road = road.replace("S", ".");
 
-  return sim;
+  const sled = Array(time).fill(road);
+
+  let pos = 0;
+
+  const result = sled.map((_, i) => {
+    if (i === 5) road = road.replaceAll("|", "*");
+    if (road[pos] !== "|") pos++;
+    const start = road.substring(0, pos - 1);
+    const end = road.substring(pos, road.length);
+    return `${start}S${end}`;
+  });
+
+  return result;
 }
